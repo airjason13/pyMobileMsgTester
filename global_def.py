@@ -1,16 +1,15 @@
 import platform
 
 import utils.log_utils
-from cmd_def import *
+from arglassescmd.cmd_def import *
+from arglassescmd.cmd_dict import *
 LOG_FILE_PREFIX = "msg_server.log"
 
 log = utils.log_utils.logging_init(__file__, LOG_FILE_PREFIX)
 
 
-if platform.machine() == "x86_64":
-    TARGET_IP = "127.0.0.1"
-else:
-    TARGET_IP = "192.168.1.2"
+
+TARGET_IP = "192.168.1.2"
 
 
 

@@ -9,20 +9,29 @@ async def tcp_client():
     reader, writer = await asyncio.open_connection(TARGET_IP, TARGET_TCP_PORT)
     print("[TCP Client] Connected to server")
     count = 0
+
     while True:
+        ''' 第一筆還是送MSG_SPEC_HELLO '''
         if count == 0:
-            # msg = f"idx:{count};src:mobile;cmd:msg_spec_hello;data:mobile_server_port=8888"
             msg = f"idx:{count};src:mobile;cmd:{MSG_SPEC_HELLO};data:mobile_server_port=8888"
-        elif count <= 10:
-            msg = f"idx:{count};src:mobile;cmd:{DEMO_GET_SW_VERSION}"
+            log.debug(f"[TCP Client] Send: {msg}")
+            writer.write(msg.encode())
+            await writer.drain()
+            data = await reader.read(100)
+            log.debug(f"[TCP Client] Received: {data.decode()}")
+            await asyncio.sleep(random.uniform(0.01, 5))
         else:
-            msg = f"idx:{count};src:mobile;cmd:{LE_GET_SW_VERSION}"
-        log.debug(f"[TCP Client] Send: {msg}")
-        writer.write(msg.encode())
-        await writer.drain()
-        data = await reader.read(100)
-        log.debug(f"[TCP Client] Received: {data.decode()}")
-        await asyncio.sleep(random.uniform(0.01, 5))
+            ''' 然後就一直輪流送 GET_CMD_SYS_Wifi dict內的vale '''
+            for k, v in GET_CMD_SYS_Wifi.items():
+                log.debug(f"{k}:{v}")
+                msg = f"idx:{count};src:mobile;cmd:{v}"
+
+                log.debug(f"[TCP Client] Send: {msg}")
+                writer.write(msg.encode())
+                await writer.drain()
+                data = await reader.read(100)
+                log.debug(f"[TCP Client] Received: {data.decode()}")
+                await asyncio.sleep(random.uniform(0.01, 5))
         count += 1
 
     print("[TCP Client] Closing connection")
