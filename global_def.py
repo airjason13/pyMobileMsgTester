@@ -10,7 +10,7 @@ log = utils.log_utils.logging_init(__file__, LOG_FILE_PREFIX)
 
 
 # TARGET_IP = "192.168.1.2"
-TARGET_IP = "192.168.0.253"
+TARGET_IP = "192.168.0.113"
 
 
 TARGET_TCP_PORT = 9527

@@ -1,11 +1,36 @@
 import asyncio
 import signal
 import random
+import time
 
 from global_def import *
 from tcp_server import TCPServer
 
-async def test_get_set(writer, reader, count: int):
+async def test_demo_get_file_list(writer, reader, count: int):
+    ''' 第一筆還是送MSG_SPEC_HELLO '''
+    if count == 0:
+        msg = f"idx:{count};src:mobile;cmd:{MSG_SPEC_HELLO};data:mobile_server_port=8888"
+        log.debug(f"[TCP Client] Send: {msg}")
+        writer.write(msg.encode())
+        await writer.drain()
+        data = await reader.read(100)
+        log.debug(f"[TCP Client] Received: {data.decode()}")
+        await asyncio.sleep(random.uniform(0.01, 5))
+    else:
+        for k, v in GET_CMD_DEMO_File_List.items():
+            log.debug(f"{k}:{v}")
+            msg = f"idx:{count};src:mobile;cmd:{v}"
+
+            # msg = f"idx:{count};src:mobile;cmd:{DEMO_SET_TEST};data:GIS-IMX93-MS062"
+
+            log.debug(f"[TCP Client] Send: {msg}")
+            writer.write(msg.encode())
+            await writer.drain()
+            data = await reader.read(100)
+            log.debug(f"[TCP Client] Received: {data.decode()}")
+            await asyncio.sleep(random.uniform(0.01, 5))
+
+async def test_wifi_get_set(writer, reader, count: int):
     ''' 第一筆還是送MSG_SPEC_HELLO '''
     if count == 0:
         msg = f"idx:{count};src:mobile;cmd:{MSG_SPEC_HELLO};data:mobile_server_port=8888"
@@ -20,7 +45,7 @@ async def test_get_set(writer, reader, count: int):
         for k, v in SET_CMD_SYS_Wifi.items():
             log.debug(f"{k}:{v}")
             if v == SYS_SET_WIFI_UAP0_SSID:
-                msg = f"idx:{count};src:mobile;cmd:{v};data:GIS-IMX93-MS062"
+                msg = f"idx:{count};src:mobile;cmd:{v};data:GIS-IMX93-MS062-A"
             elif v == SYS_SET_WIFI_UAP0_PWD:
                 msg = f"idx:{count};src:mobile;cmd:{v};data:54098493"
             elif v == SYS_SET_WIFI_UAP0_HW_MODE:
@@ -28,6 +53,8 @@ async def test_get_set(writer, reader, count: int):
             elif v == SYS_SET_WIFI_UAP0_SSID_PWD:
                 msg = f"idx:{count};src:mobile;cmd:{v};data:GIS-IMX93-MS062_54098493"
             # msg = f"idx:{count};src:mobile;cmd:{DEMO_SET_TEST};data:GIS-IMX93-MS062"
+            elif v == SYS_SET_WIFI_UAP0_RESTART:
+                msg = f"idx:{count};src:mobile;cmd:{v};data:true"
 
             log.debug(f"[TCP Client] Send: {msg}")
             writer.write(msg.encode())
@@ -36,7 +63,7 @@ async def test_get_set(writer, reader, count: int):
             log.debug(f"[TCP Client] Received: {data.decode()}")
             await asyncio.sleep(random.uniform(0.01, 5))
 
-        '''for k, v in GET_CMD_SYS_Wifi.items():
+        for k, v in GET_CMD_SYS_Wifi.items():
             log.debug(f"{k}:{v}")
             msg = f"idx:{count};src:mobile;cmd:{v}"
 
@@ -47,7 +74,10 @@ async def test_get_set(writer, reader, count: int):
             await writer.drain()
             data = await reader.read(100)
             log.debug(f"[TCP Client] Received: {data.decode()}")
-            await asyncio.sleep(random.uniform(0.01, 5))'''
+            await asyncio.sleep(random.uniform(0.01, 5))
+
+
+
 
 
 # ---------------- TCP ----------------
@@ -57,7 +87,7 @@ async def tcp_client():
     count = 0
 
     while True:
-        await test_get_set(writer, reader, count)
+        await test_demo_get_file_list(writer, reader, count)
         ''' 第一筆還是送MSG_SPEC_HELLO '''
         '''if count == 0:
             msg = f"idx:{count};src:mobile;cmd:{MSG_SPEC_HELLO};data:mobile_server_port=8888"
@@ -122,7 +152,9 @@ async def udp_client():
 
 async def main():
     tcp = TCPServer('0.0.0.0', SELF_TCP_PORT)
+
     await tcp.start()
+
     await asyncio.gather(
         tcp_client(),
         # udp_client(),

@@ -43,7 +43,7 @@ class TCPServer:
                 pass
 
     async def start(self):
-        self._server = await asyncio.start_server(self._handle_client, self.host, self.port)
+        self._server = await asyncio.start_server(self._handle_client, self.host, self.port, reuse_address=True)
         sock = self._server.sockets[0].getsockname() if self._server.sockets else (self.host, self.port)
         log.debug("[TCP]   Serving on %s",sock)
         self._serve_task = asyncio.create_task(self._server.serve_forever())
