@@ -4,6 +4,52 @@ import random
 
 from global_def import *
 from tcp_server import TCPServer
+
+async def test_get_set(writer, reader, count: int):
+    ''' 第一筆還是送MSG_SPEC_HELLO '''
+    if count == 0:
+        msg = f"idx:{count};src:mobile;cmd:{MSG_SPEC_HELLO};data:mobile_server_port=8888"
+        log.debug(f"[TCP Client] Send: {msg}")
+        writer.write(msg.encode())
+        await writer.drain()
+        data = await reader.read(100)
+        log.debug(f"[TCP Client] Received: {data.decode()}")
+        await asyncio.sleep(random.uniform(0.01, 5))
+    else:
+        ''' 然後就一直輪流送 GET_CMD_SYS_Wifi dict內的vale '''
+        for k, v in SET_CMD_SYS_Wifi.items():
+            log.debug(f"{k}:{v}")
+            if v == SYS_SET_WIFI_UAP0_SSID:
+                msg = f"idx:{count};src:mobile;cmd:{v};data:GIS-IMX93-MS062"
+            elif v == SYS_SET_WIFI_UAP0_PWD:
+                msg = f"idx:{count};src:mobile;cmd:{v};data:54098493"
+            elif v == SYS_SET_WIFI_UAP0_HW_MODE:
+                msg = f"idx:{count};src:mobile;cmd:{v};data:g"
+            elif v == SYS_SET_WIFI_UAP0_SSID_PWD:
+                msg = f"idx:{count};src:mobile;cmd:{v};data:GIS-IMX93-MS062_54098493"
+            # msg = f"idx:{count};src:mobile;cmd:{DEMO_SET_TEST};data:GIS-IMX93-MS062"
+
+            log.debug(f"[TCP Client] Send: {msg}")
+            writer.write(msg.encode())
+            await writer.drain()
+            data = await reader.read(100)
+            log.debug(f"[TCP Client] Received: {data.decode()}")
+            await asyncio.sleep(random.uniform(0.01, 5))
+
+        '''for k, v in GET_CMD_SYS_Wifi.items():
+            log.debug(f"{k}:{v}")
+            msg = f"idx:{count};src:mobile;cmd:{v}"
+
+            # msg = f"idx:{count};src:mobile;cmd:{DEMO_SET_TEST};data:GIS-IMX93-MS062"
+
+            log.debug(f"[TCP Client] Send: {msg}")
+            writer.write(msg.encode())
+            await writer.drain()
+            data = await reader.read(100)
+            log.debug(f"[TCP Client] Received: {data.decode()}")
+            await asyncio.sleep(random.uniform(0.01, 5))'''
+
+
 # ---------------- TCP ----------------
 async def tcp_client():
     reader, writer = await asyncio.open_connection(TARGET_IP, TARGET_TCP_PORT)
@@ -11,8 +57,9 @@ async def tcp_client():
     count = 0
 
     while True:
+        await test_get_set(writer, reader, count)
         ''' 第一筆還是送MSG_SPEC_HELLO '''
-        if count == 0:
+        '''if count == 0:
             msg = f"idx:{count};src:mobile;cmd:{MSG_SPEC_HELLO};data:mobile_server_port=8888"
             log.debug(f"[TCP Client] Send: {msg}")
             writer.write(msg.encode())
@@ -21,17 +68,19 @@ async def tcp_client():
             log.debug(f"[TCP Client] Received: {data.decode()}")
             await asyncio.sleep(random.uniform(0.01, 5))
         else:
-            ''' 然後就一直輪流送 GET_CMD_SYS_Wifi dict內的vale '''
-            for k, v in GET_CMD_SYS_Wifi.items():
+            
+            for k, v in SET_CMD_TEST.items():
                 log.debug(f"{k}:{v}")
-                msg = f"idx:{count};src:mobile;cmd:{v}"
+                msg = f"idx:{count};src:mobile;cmd:{v};data:GIS-IMX93-MS062"
+
+                # msg = f"idx:{count};src:mobile;cmd:{DEMO_SET_TEST};data:GIS-IMX93-MS062"
 
                 log.debug(f"[TCP Client] Send: {msg}")
                 writer.write(msg.encode())
                 await writer.drain()
                 data = await reader.read(100)
                 log.debug(f"[TCP Client] Received: {data.decode()}")
-                await asyncio.sleep(random.uniform(0.01, 5))
+                await asyncio.sleep(random.uniform(0.01, 5))'''
         count += 1
 
     print("[TCP Client] Closing connection")
