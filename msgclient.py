@@ -30,6 +30,28 @@ async def test_demo_get_file_list(writer, reader, count: int):
             log.debug(f"[TCP Client] Received: {data.decode()}")
             await asyncio.sleep(random.uniform(0.01, 5))
 
+async def test_get_demo_sw_version(writer, reader, count: int):
+    ''' 第一筆還是送MSG_SPEC_HELLO '''
+    if count == 0:
+        msg = f"idx:{count};src:mobile;cmd:{MSG_SPEC_HELLO};data:mobile_server_port=8888"
+        log.debug(f"[TCP Client] Send: {msg}")
+        writer.write(msg.encode())
+        await writer.drain()
+        data = await reader.read(100)
+        log.debug(f"[TCP Client] Received: {data.decode()}")
+        await asyncio.sleep(random.uniform(0.01, 5))
+    else:
+        msg = f"idx:{count};src:mobile;cmd:{DEMO_GET_SW_VERSION};OK"
+
+        # msg = f"idx:{count};src:mobile;cmd:{DEMO_SET_TEST};data:GIS-IMX93-MS062"
+
+        log.debug(f"[TCP Client] Send: {msg}")
+        writer.write(msg.encode())
+        await writer.drain()
+        data = await reader.read(100)
+        log.debug(f"[TCP Client] Received: {data.decode()}")
+        await asyncio.sleep(random.uniform(0.01, 5))
+
 async def test_wifi_get_set(writer, reader, count: int):
     ''' 第一筆還是送MSG_SPEC_HELLO '''
     if count == 0:
